@@ -265,7 +265,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         root = Path(settings.static_dir)
         index = root / "index.html"
 
-        @app.get("/{path:path}", include_in_schema=False)
+        @app.api_route("/{path:path}", methods=["GET", "HEAD"], include_in_schema=False)
         def spa(path: str) -> FileResponse:  # sync: file system checks run in the thread pool
             if path.startswith("api/"):
                 raise HTTPException(404, "Nicht gefunden")
