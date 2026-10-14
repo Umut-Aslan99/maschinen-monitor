@@ -24,7 +24,7 @@ from monitor.push import Pusher
 from monitor.settings import Settings
 from monitor.shifts import shift_at
 
-log = logging.getLogger("app")
+log = logging.getLogger(__name__)
 
 
 def now() -> datetime:
@@ -49,7 +49,19 @@ class PushSubscription(BaseModel):
     keys: PushKeys
 
 
+def setup_logging() -> None:
+    """Our own handler for the monitor.* loggers – independent of how uvicorn configures logging."""
+    logger = logging.getLogger("monitor")
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
+    setup_logging()
     settings = settings or Settings()
     live = Live()
     state: dict[str, Any] = {}

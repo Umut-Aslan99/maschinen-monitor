@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 from monitor import store
-from monitor.backfill import backfill
+from monitor.backfill import LIVE_MARGIN, STEP, backfill
 from monitor.catalog import BY_ID, MACHINES
 from monitor.db import Pool
 from monitor.oee import Interval, compute, count_parts
@@ -17,17 +17,18 @@ async def test_backfill_writes_the_model_and_the_dashboard_computes_the_same_oee
     filled = await backfill(pool, NOW, days=0.5)
     assert set(filled) == {m.id for m in MACHINES}
 
+    end = NOW - LIVE_MARGIN  # where the backfill stops and live data takes over
     for m in (BY_ID["SGM-01"], BY_ID["CNC-02"]):
         shift = shift_at(NOW - timedelta(hours=1))
-        from_db = await store.oee_for(pool, m, shift.start, NOW)
+        from_db = await store.oee_for(pool, m, shift.start, end)
         tl = Timeline(m)
-        good, scrap = count_parts(tl.parts(shift.start, NOW), shift.start, NOW)
+        good, scrap = count_parts(tl.parts(shift.start, end), shift.start, end)
         expected = compute(
-            [Interval(s.start, s.end, s.state, s.reason) for s in tl.segments(shift.start, NOW)],
+            [Interval(s.start, s.end, s.state, s.reason) for s in tl.segments(shift.start, end)],
             good,
             scrap,
             shift.start,
-            NOW,
+            end,
             m.cycle_s,
         )
         assert from_db == expected
@@ -43,8 +44,15 @@ async def test_backfill_only_fills_what_is_missing(pool: Pool) -> None:
 
     later = NOW + timedelta(hours=1)
     filled = await backfill(pool, later, days=0.25)
-    assert filled["CNC-01"] == 360 * 3  # one hour at 10 s, three signals
+    assert filled["CNC-01"] == 360 * 3  # one hour at 10 s, three signals – continuing exactly where it stopped
     assert await pool.fetchval("SELECT count(*) FROM telemetry WHERE machine_id = 'CNC-01'") == before + 360 * 3
+
+
+async def test_backfill_keeps_away_from_the_live_edge(pool: Pool) -> None:
+    await backfill(pool, NOW, days=0.1)
+    newest = await pool.fetchval("SELECT max(time) FROM telemetry")
+    assert newest < NOW - LIVE_MARGIN + STEP
+    assert newest >= NOW - LIVE_MARGIN - STEP
 
 
 async def test_backfill_records_machine_alarms_of_past_faults(pool: Pool) -> None:

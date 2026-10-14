@@ -13,7 +13,7 @@ from monitor.catalog import CRITICAL_REASONS, INJECTABLE, MACHINES, REASONS, Sta
 from monitor.sim.model import Segment, Timeline
 from monitor.topics import BASE, iso, parse, topic
 
-log = logging.getLogger("sim")
+log = logging.getLogger(__name__)
 TICK = timedelta(seconds=2)
 
 

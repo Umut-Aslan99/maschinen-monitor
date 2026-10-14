@@ -14,6 +14,10 @@ glaubwürdige Historie der letzten Tage zeigen. Außerdem stellt MQTT mit QoS 1 
   Die Lücke wird bis zum **Startzeitpunkt** gemessen – Live-Daten, die währenddessen eintreffen, dürfen die Lücke nicht
   als geschlossen erscheinen lassen (ein Test sichert genau das ab). Die Berechnung läuft in einem Thread, damit der
   Live-Empfang weiterläuft.
+- Der Lückenfüller endet **30 Sekunden vor** dem Startzeitpunkt. Schreiben Lückenfüller und Live-Empfang dieselben
+  Zeilen in unterschiedlicher Reihenfolge, kann PostgreSQL einen Deadlock erkennen und eine Transaktion abbrechen –
+  genau das ist beim ersten Deployment passiert. Ohne gemeinsame Zeilen gibt es keinen gemeinsamen Lock; für den
+  Fall der Fälle gibt es drei Versuche je Maschine.
 - Alle Tabellen haben eindeutige Schlüssel (Maschine + Zeit); Einfügen mit `ON CONFLICT DO NOTHING`. Doppelte
   Zustellung, Überlappung von Live- und Fülldaten und erneutes Füllen sind dadurch harmlos.
 - Von Besuchern ausgelöste Störungen überlagern den Plan für drei Minuten; danach läuft der Plan weiter.

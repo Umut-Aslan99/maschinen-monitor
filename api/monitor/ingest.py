@@ -16,7 +16,7 @@ from monitor.rules import LimitMonitor, Severity
 from monitor.settings import Settings
 from monitor.topics import BASE, parse, parse_time
 
-log = logging.getLogger("ingest")
+log = logging.getLogger(__name__)
 
 
 class Ingest:

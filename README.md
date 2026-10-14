@@ -54,7 +54,7 @@ Entscheidungen und Begründungen: [docs/adr](docs/adr).
 | Ebene | Anzahl | Beispiele |
 |---|---|---|
 | Domäne (pytest) | 33 | Schichtkalender inkl. Zeitumstellung · OEE-Lehrbuchbeispiel · Grenzwertregel: einzelne Spitze alarmiert nicht, Eskalation, Hysterese · Hydrauliköl wird vor Hydraulikstörungen warm |
-| Integration (pytest, echte TimescaleDB + Mosquitto) | 18 | MQTT → Datenbank → Dashboard · doppelt zugestellte Nachrichten zählen einmal · Störung nur an laufender Maschine, mit Sperrzeit · Lückenfüller schreibt dasselbe wie das Modell und nur, was fehlt · Push höchstens alle 5 Minuten · nur Dateien aus dem Build werden ausgeliefert |
+| Integration (pytest, echte TimescaleDB + Mosquitto) | 19 | MQTT → Datenbank → Dashboard · doppelt zugestellte Nachrichten zählen einmal · Störung nur an laufender Maschine, mit Sperrzeit · Lückenfüller schreibt dasselbe wie das Modell und nur, was fehlt · Push höchstens alle 5 Minuten · nur Dateien aus dem Build werden ausgeliefert |
 | Frontend (Vitest) | 12 | Zeitachsen auf runden Berliner Uhrzeiten · Live-Store · Verlustkaskade |
 | End-to-End (Playwright) | 11 | Störung auslösen, zweiter Besucher sieht sie live, Alarm quittieren · Stillstand zuordnen · keine Anfrage verlässt die Seite, keine CSP-Verletzung · kein Querscrollen auf dem Handy |
 

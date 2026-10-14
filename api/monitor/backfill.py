@@ -9,29 +9,43 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+import asyncpg
+
 from monitor.catalog import CRITICAL_REASONS, MACHINES, REASONS, Machine
 from monitor.db import Pool
 from monitor.rules import LimitMonitor
 from monitor.sim.model import Segment, Timeline
 
-log = logging.getLogger("backfill")
+log = logging.getLogger(__name__)
 STEP = timedelta(seconds=10)
+LIVE_MARGIN = timedelta(seconds=30)
 COARSE = timedelta(seconds=60)
 
 
 async def backfill(pool: Pool, now: datetime, days: float) -> dict[str, int]:
-    """Fills [last stored sample, now) per machine. `now` is the start time of this process: live data that
-    arrives while the backfill runs is newer and must not make the gap look closed."""
+    """Fills [last stored sample, now − LIVE_MARGIN) per machine. `now` is the start time of this process: live data
+    that arrives while the backfill runs is newer and must not make the gap look closed. The margin keeps backfill
+    and live ingestion away from the same rows – both writing the same keys in different order can deadlock."""
     filled: dict[str, int] = {}
     horizon = now - timedelta(days=days)
+    end = now - LIVE_MARGIN
     for m in MACHINES:
         last = await pool.fetchval(
             "SELECT max(time) FROM telemetry WHERE machine_id = $1 AND time > $2 AND time <= $3", m.id, horizon, now
         )
         start = last + STEP if last is not None else horizon
-        if now - start < timedelta(minutes=1):
+        if end - start < timedelta(minutes=1):
             continue
-        filled[m.id] = await _fill(pool, m, start.replace(microsecond=0), now)
+        for attempt in range(3):
+            try:
+                filled[m.id] = await _fill(pool, m, start.replace(microsecond=0), end)
+                break
+            except asyncpg.exceptions.DeadlockDetectedError:
+                log.warning("deadlock while backfilling %s (attempt %d)", m.id, attempt + 1)
+                await asyncio.sleep(1 + attempt)
+            except Exception:
+                log.exception("backfill of %s failed", m.id)
+                break
     if filled:
         await pool.execute(
             "CALL refresh_continuous_aggregate('telemetry_1m', $1::timestamptz, $2::timestamptz)", horizon, now

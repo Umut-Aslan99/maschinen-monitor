@@ -12,6 +12,11 @@ grün ist. Diagrammfarben wurden mit einem Prüfskript gegen beide Hintergründe
 - **Lückenfüller füllte nur die erste Maschine:** Während er lief, kamen schon Live-Daten der anderen Maschinen an,
   und deren Lücke sah dadurch geschlossen aus. Gefunden beim ersten Start des kompletten Stacks; jetzt wird bis zum
   Startzeitpunkt gemessen, ein Regressionstest sichert das ab.
+- **Deadlock beim Start:** Lückenfüller und Live-Empfang schrieben gleichzeitig dieselben jüngsten Zeilen; PostgreSQL
+  brach den Lückenfüller ab, die Historie blieb leer – aber nur bei ungünstigem Timing. Gefunden, weil ein
+  End-to-End-Test beim zweiten Deployment fehlschlug (das Deployment wurde dadurch automatisch gestoppt), bestätigt im
+  Datenbank-Log. Lösung: keine gemeinsamen Zeilen mehr (30 s Abstand zur Live-Kante), Wiederholung bei Deadlock,
+  und eigene Log-Ausgabe – der Fehler war vorher in der Konsole nicht zu sehen.
 - **Schriften von der Sicherheitsrichtlinie blockiert:** Vite bettete kleine Schriftdateien als `data:`-URL ein, die
   CSP erlaubt nur Dateien vom eigenen Server. Gefunden über die Browserkonsole; der End-to-End-Test „keine
   CSP-Verletzung“ prüft das seitdem.

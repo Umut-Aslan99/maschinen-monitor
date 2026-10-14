@@ -11,7 +11,7 @@ from pywebpush import WebPushException, webpush
 from monitor.db import Pool
 from monitor.settings import Settings
 
-log = logging.getLogger("push")
+log = logging.getLogger(__name__)
 MIN_GAP = "5 minutes"
 LIFETIME = "24 hours"
 
