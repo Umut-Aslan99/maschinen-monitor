@@ -1,0 +1,35 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create CI secrets
+        run: |
+          {
+            echo "DB_PASSWORD=$(openssl rand -hex 16)"
+            echo "MQTT_SIM_PASSWORD=$(openssl rand -hex 16)"
+            echo "MQTT_MONITOR_PASSWORD=$(openssl rand -hex 16)"
+          } > .env
+      - name: Backend (ruff, mypy, pytest + TimescaleDB + Mosquitto), web (Vitest, in the image build), end-to-end (Playwright)
+        run: ./ops.sh test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright, path: e2e/test-results }
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: cd ~/projects/maschinen-monitor && git pull --ff-only && ./ops.sh deploy

@@ -1,0 +1,14 @@
+# The simulator publishes machine data and receives commands; the API reads machine data and sends commands.
+user simulator
+topic write demo-werk/halle-1/+/telemetry
+topic write demo-werk/halle-1/+/state
+topic write demo-werk/halle-1/+/part
+topic write demo-werk/halle-1/+/alarm
+topic read demo-werk/halle-1/+/cmd
+
+user monitor
+topic read demo-werk/halle-1/+/telemetry
+topic read demo-werk/halle-1/+/state
+topic read demo-werk/halle-1/+/part
+topic read demo-werk/halle-1/+/alarm
+topic write demo-werk/halle-1/+/cmd
