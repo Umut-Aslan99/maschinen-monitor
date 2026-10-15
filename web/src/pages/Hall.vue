@@ -47,7 +47,7 @@ const meters = (o: Overview['machines'][number]['oee']) => [
   <p v-if="error" class="alert alert-error" role="alert">Die Übersicht konnte nicht geladen werden. Bitte später erneut versuchen.</p>
 
   <template v-if="data">
-    <section class="card hero" aria-label="Kennzahlen der Halle">
+    <section class="card hero" aria-label="Kennzahlen der Halle" data-tour="hall-kpis">
       <div>
         <span class="label">OEE Halle · {{ data.shift.label }}</span>
         <div class="hero-figure" data-testid="hall-oee">{{ pct(data.hall.oee) }}</div>
@@ -60,8 +60,8 @@ const meters = (o: Overview['machines'][number]['oee']) => [
     </section>
 
     <h2 class="section">Maschinen</h2>
-    <div class="machines">
-      <RouterLink v-for="m in cards" :key="m.id" class="card machine" :data-s="m.state ?? 'off'" :to="`/maschine/${m.id}`" :data-testid="`machine-${m.id}`">
+    <div class="machines" data-tour="machines">
+      <RouterLink v-for="m in cards" :key="m.id" class="card machine" :data-s="m.state ?? 'off'" :to="`/maschine/${m.id}`" :data-testid="`machine-${m.id}`" :data-tour="m.id === 'SGM-01' ? 'problem-machine' : undefined">
         <header>
           <div><span class="id">{{ m.id }} · {{ m.kind }}</span><h2>{{ m.name }}</h2></div>
           <span v-if="m.alarms" class="chip" :class="{ 'chip-critical': m.critical }">⚠ {{ m.alarms }} Alarm{{ m.alarms > 1 ? 'e' : '' }}</span>

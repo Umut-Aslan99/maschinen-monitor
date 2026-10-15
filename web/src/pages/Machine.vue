@@ -102,7 +102,7 @@ async function fault() {
         <h1>{{ m.name }}</h1>
         <p style="margin-top: 12px"><StateBadge :state="state" :reason="stateInfo.reason" :since="stateInfo.since" :now="now" /></p>
       </div>
-      <form class="fault card" style="padding: 12px 14px" @submit.prevent="fault">
+      <form class="fault card" style="padding: 12px 14px" @submit.prevent="fault" data-tour="fault">
         <label class="label" for="fault-reason" style="flex-basis: 100%">Demo: Störung auslösen</label>
         <select id="fault-reason" v-model="faultReason" class="select" data-testid="fault-reason">
           <option v-for="code in meta.injectable" :key="code" :value="code">{{ reasonText(code) }}</option>
@@ -130,7 +130,7 @@ async function fault() {
     </div>
 
     <p v-if="historyLoading" class="alert" role="status" style="margin-bottom: 12px">Der Verlauf der letzten Tage wird gerade nachgeladen (nach einer Ruhephase der Demo) – längere Zeiträume sind gleich vollständig.</p>
-    <div v-if="series" class="signals">
+    <div v-if="series" class="signals" data-tour="signals">
       <ChartFrame title="Zustand" :sub="range === '15m' ? 'Letzte 15 Minuten, live' : `Letzte ${RANGES.find((r) => r.key === range)?.label}`">
         <StateTimeline :intervals="series.timeline" :start="startS" :end="endS" />
         <template #table>
@@ -155,7 +155,7 @@ async function fault() {
     </div>
 
     <div class="charts" style="margin-top: 14px">
-      <ChartFrame title="Wohin die Schichtzeit ging" :sub="`${detail.shift.label}, bis jetzt`">
+      <ChartFrame data-tour="losses" title="Wohin die Schichtzeit ging" :sub="`${detail.shift.label}, bis jetzt`">
         <LossCascade :oee="detail.oee" />
         <template #table>
           <table class="data"><thead><tr><th>Grund</th><th class="right">Minuten</th></tr></thead>

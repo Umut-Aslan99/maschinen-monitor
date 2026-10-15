@@ -60,7 +60,7 @@ async function togglePush() {
   </section>
 
   <h2 class="section" style="margin-top: 0">Aktiv ({{ active.length }})</h2>
-  <section class="card panel">
+  <section class="card panel" data-tour="alarms">
     <ul class="list" data-testid="active-alarms">
       <li v-for="a in active" :key="a.id">
         <span class="chip" :class="{ 'chip-critical': a.severity === 'critical' }">{{ a.severity === 'critical' ? '⚠ Kritisch' : 'Warnung' }}</span>

@@ -53,7 +53,7 @@ function classified(stop: Stop, text: string) {
     </select>
   </div>
 
-  <ChartFrame v-if="pareto" title="Stillstandszeit nach Grund" :sub="`${machine || 'Alle Maschinen'} · ${RANGES.find((r) => r.key === range)?.label}`">
+  <ChartFrame v-if="pareto" data-tour="pareto" title="Stillstandszeit nach Grund" :sub="`${machine || 'Alle Maschinen'} · ${RANGES.find((r) => r.key === range)?.label}`">
     <ParetoChart :data="pareto" />
     <template #table>
       <table class="data"><thead><tr><th>Grund</th><th class="right">Anzahl</th><th class="right">Minuten</th><th class="right">Anteil</th><th class="right">Kumuliert</th></tr></thead>
@@ -65,7 +65,7 @@ function classified(stop: Stop, text: string) {
   <h2 class="section">Ungeklärte Stillstände (24 h)</h2>
   <p v-if="done" class="alert alert-ok" role="status" style="margin-bottom: 12px">{{ done }}</p>
   <section class="card panel">
-    <ul class="list" data-testid="unclassified">
+    <ul class="list" data-testid="unclassified" data-tour="unclassified">
       <li v-for="s in open" :key="s.machine + s.start" style="flex-wrap: wrap">
         <RouterLink class="mono" :to="`/maschine/${s.machine}`">{{ s.machine }}</RouterLink>
         <span class="grow">{{ when(s.start) }} · {{ s.open ? 'läuft seit ' : '' }}{{ duration(s.min) }}</span>
