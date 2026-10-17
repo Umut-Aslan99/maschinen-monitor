@@ -21,9 +21,11 @@ jobs:
         if: failure()
         with: { name: playwright, path: e2e/test-results }
 
+  # Off until the repo variable DEPLOY_ENABLED is true (Settings > Secrets and variables > Actions > Variables)
+  # and the DEPLOY_HOST / DEPLOY_USER / DEPLOY_KEY secrets exist; until then it shows as skipped, not failed.
   deploy:
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: vars.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: production
     steps:
