@@ -25,6 +25,5 @@ COPY --from=web /web/dist ./static
 ENV PATH=/app/.venv/bin:$PATH PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 STATIC_DIR=/app/static TZ=Europe/Berlin
 USER app
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --start-interval=2s \
-  CMD python -c "import urllib.request,sys; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=2).status != 200)"
+# Health check: on the app service in docker-compose.yml (the simulator runs this image too and has no HTTP endpoint).
 CMD ["uvicorn", "monitor.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*", "--no-server-header", "--log-level", "warning"]
